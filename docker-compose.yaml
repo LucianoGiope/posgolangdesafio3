@@ -1,0 +1,80 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: orders
+      MYSQL_PASSWORD: root
+    ports:
+      - 3306:3306
+    volumes:
+      - .docker/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - order-system-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - order-system-network
+
+  migrate:
+    build:
+      context: .
+      dockerfile: migrate.Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - order-system-network
+    volumes:
+      - ./migrations:/migrations
+
+  order-system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: order-system
+    env_file:
+      - ./cmd/ordersystem/.env
+    volumes:
+      - ./cmd/ordersystem/.env:/app/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+      - "50051:50051"
+      - "8080:8080"
+    networks:
+      - order-system-network
+
+networks:
+  order-system-network:
+    driver: bridge
