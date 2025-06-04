@@ -37,7 +37,7 @@ Usar as urls do http que estão na pasta api.
 
 ### EXECUTAR NO MÉTODO GraphQL
 
-http://localhost:8080/
+`http://localhost:8080/`
 
 - CreateOrder
 mutation createOrder {
@@ -60,4 +60,4 @@ query listOrders {
 }
 
 ### AVALIAR AS MENSAGEM NO HABBITMQ
-http://localhost:15672/
+`http://localhost:15672/`
