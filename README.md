@@ -1,4 +1,8 @@
+# TERCEIRO desafio proposto pelo curso.
+
 # DESAFIO DO CLEAN ARCHITECTURE
+
+# Texto descritivo do desafio
 
 Olá devs!
 Agora é a hora de botar a mão na massa. Para este desafio, você precisará criar o usecase de listagem das orders.
